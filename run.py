@@ -11,6 +11,7 @@ from app.core.bot_setup import bot, dp
 from app.core.infrastructure import make_scheduler, shutdown, startup
 from app.services.movie_api import movie_service
 from config import settings
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -124,8 +125,7 @@ async def stats() -> dict:
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        log_level="info",
+        "run:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
     )
