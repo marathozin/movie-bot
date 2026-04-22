@@ -9,7 +9,7 @@ def get_movie_card_keyboard(
     """
     more_part = show_more_callback or ""
     save_btn = InlineKeyboardButton(
-        text="⛓️‍💥 Удалить" if is_saved else "❤️ Сохранить",
+        text="Удалить" if is_saved else "❤️ Сохранить",
         callback_data=f"save_movie:{kinopoisk_id}:{more_part}",
     )
     if show_more_callback:

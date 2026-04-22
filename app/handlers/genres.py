@@ -49,7 +49,7 @@ async def handle_genre_callback(callback: CallbackQuery, session: AsyncSession) 
         await callback.message.answer(
             f"😔 Фильмы жанра *{genre_label}* ещё не загружены.\n"
             "Кеш обновляется раз в 24 ч — попробуйте чуть позже"
-            "или выберите другой жанр.",
+            " или выберите другой жанр.",
             parse_mode="Markdown",
         )
         return
