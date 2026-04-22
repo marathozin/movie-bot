@@ -39,8 +39,7 @@ async def cmd_start(message: Message, session: AsyncSession) -> None:
         message_text = f.read()
 
     await message.answer(
-        f"{greeting}\n\n",
-        message_text,
+        f"{greeting}\n\n{message_text}",
         parse_mode="Markdown",
         reply_markup=get_main_keyboard(),
     )
