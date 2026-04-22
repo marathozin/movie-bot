@@ -41,6 +41,7 @@ def last_random_key(user_id: int, genre_name: str) -> str:
 def search_quota_key(user_id: int) -> str:
     return f"search_quota:{user_id}"
 
+CACHE_WARMED_KEY = "cache:warmed"
 
 def _seconds_until_midnight_utc() -> int:
     """Seconds remaining until 00:00 UTC - used as TTL for the daily quota key."""
@@ -59,6 +60,10 @@ class MovieService:
         Fetch pages of TOP_POPULAR_MOVIES in parallel (semaphore=10)
         and build all Redis indexes. Runs once at startup and every 24 h.
         """
+        if await redis_client.exists(CACHE_WARMED_KEY):
+            logger.info('Cache already warmed, skipping.')
+            return
+        
         # Fetch page 1 to discover totalPages
         try:
             first = await kinopoisk_client.get_collection(page=1)
