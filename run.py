@@ -5,7 +5,7 @@ from typing import AsyncGenerator
 
 import uvicorn
 from aiogram.types import Update
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Header, HTTPException
 
 from app.core.bot_setup import bot, dp
 from app.core.infrastructure import make_scheduler, shutdown, startup
@@ -38,7 +38,11 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         )
     
     webhook_url = f"{settings.WEBHOOK_URL}{settings.WEBHOOK_PATH}"
-    await bot.set_webhook(webhook_url, drop_pending_updates=True)
+    await bot.set_webhook(
+        webhook_url,
+        secret_token=settings.WEBHOOK_SECRET, 
+        drop_pending_updates=True
+    )
     logger.info(f"Webhook registered: {webhook_url}")
 
     yield
@@ -54,8 +58,13 @@ app = FastAPI(title="Movie Bot", lifespan=lifespan)
 
 
 @app.post(settings.WEBHOOK_PATH)
-async def telegram_webhook(request: Request) -> Response:
+async def telegram_webhook(
+    request: Request,
+    x_telegram_bot_api_secret_token: str = Header(None),
+) -> Response:
     """Принимает обновления от Telegram и передаёт в aiogram dispatcher."""
+    if x_telegram_bot_api_secret_token != settings.SECRET_TOKEN:
+        raise HTTPException(status_code=403)
     data = await request.json()
     update = Update.model_validate(data, context={"bot": bot})
     await dp.feed_update(bot=bot, update=update)
