@@ -5,10 +5,12 @@ from typing import AsyncGenerator
 
 import uvicorn
 from aiogram.types import Update
-from fastapi import FastAPI, Request, Response, Header, HTTPException
+from fastapi import FastAPI, Request, Response, Header, Depends, HTTPException
 
 from app.core.bot_setup import bot, dp
 from app.core.infrastructure import make_scheduler, shutdown, startup
+from app.core.admin_auth import verify_admin_key
+
 from app.services.movie_api import movie_service
 from config import settings
 import os
@@ -76,14 +78,14 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-@app.post("/admin/refresh-cache")
+@app.post("/admin/refresh-cache", dependencies=[Depends(verify_admin_key)])
 async def refresh_cache() -> dict:
     """Manually trigger a full cache warm in the background."""
     asyncio.create_task(movie_service.warm_cache(), name="manual_cache_warm")
     return {"status": "Cache refresh started in background."}
 
 
-@app.get("/admin/stats")
+@app.get("/admin/stats", dependencies=[Depends(verify_admin_key)])
 async def stats() -> dict:
     """Return live Redis and Postgres statistics."""
     from sqlalchemy import func, select

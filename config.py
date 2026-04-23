@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    ADMIN_API_KEY: str
+    
     # Telegram
     BOT_TOKEN: str
     SECRET_TOKEN: str
