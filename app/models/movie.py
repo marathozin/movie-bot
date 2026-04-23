@@ -73,7 +73,7 @@ class Movie(BaseModel):
         ]
         if self.kinopoisk_id:
             lines.append(
-                "\n*Ссылка на Кинопоиск:"
+                "\n*Ссылка на Кинопоиск: "
                 f"https://www.kinopoisk.ru/film/{self.kinopoisk_id}*"
             )
         if self.poster_url:
