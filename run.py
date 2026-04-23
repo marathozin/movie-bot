@@ -45,7 +45,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         secret_token=settings.SECRET_TOKEN, 
         drop_pending_updates=True
     )
-    logger.info(f"Webhook registered: {webhook_url}")
+    logger.info("Webhook registered: %s", webhook_url)
 
     yield
 

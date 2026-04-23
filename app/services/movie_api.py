@@ -68,13 +68,14 @@ class MovieService:
         try:
             first = await kinopoisk_client.get_collection(page=1)
         except Exception as exc:
-            logger.error(f"Could not fetch collection page 1: {exc}")
+            logger.error("Could not fetch collection page 1: %s", exc)
             return
 
         total_pages = first.get("totalPages", 1)
 
         logger.info(
-            f"Cache warming started (TOP_POPULAR_MOVIES, {total_pages} pages).",
+            "Cache warming started (TOP_POPULAR_MOVIES, %s pages).",
+            total_pages
         )
         semaphore = asyncio.Semaphore(10)
 
@@ -84,7 +85,10 @@ class MovieService:
                     data = await kinopoisk_client.get_collection(page=page)
                     return page, data
                 except Exception as exc:
-                    logger.warning(f"Collection page {page} failed: {exc}")
+                    logger.warning(
+                        "Collection page %s failed: %s",
+                        page, exc
+                    )
                     return page, None
 
         # Fetch remaining pages in parallel (page 1 already fetched)
@@ -103,7 +107,7 @@ class MovieService:
                 try:
                     all_movies.append(Movie.from_api(item))
                 except Exception as exc:
-                    logger.debug(f"Skipping incorrect movie item: {exc}")
+                    logger.debug("Skipping incorrect movie item: %s", exc)
 
         if not all_movies:
             logger.error("Cache warming produced 0 movies. Check API key or quota.")
@@ -117,7 +121,10 @@ class MovieService:
                 seen.add(m.kinopoisk_id)
                 unique_movies.append(m)
 
-        logger.info(f"Fetched {len(unique_movies)} unique movies. Building indexes...")
+        logger.info(
+            "Fetched %s unique movies. Building indexes...", 
+            len(unique_movies)
+        )
         await self._index_all(unique_movies)
         logger.info("Cache warming complete.")
 
@@ -176,8 +183,9 @@ class MovieService:
                 await session.execute(stmt)
                 await session.commit()
 
-        logger.info(
-            f"Indexed {len(genre_buckets)} genre buckets, {len(db_rows)} Postgres rows."
+        logger.info("Indexed %s genre buckets, %s Postgres rows.",
+            len(genre_buckets),
+            len(db_rows)
         )
 
     # Keyword search
@@ -221,7 +229,7 @@ class MovieService:
         try:
             data = await kinopoisk_client.search_by_keyword(query, page=1)
         except Exception as exc:
-            logger.error(f"API keyword search failed: {exc}")
+            logger.error("API keyword search failed: %s", exc)
             return [], remaining
 
         items = data.get("films", [])
@@ -231,8 +239,9 @@ class MovieService:
             await redis_client.set_json(movie_key(m.kinopoisk_id), m.model_dump())
 
         logger.info(
-            f"Keyword search '{query}' by user {user_id}:"
-            f"{len(movies)} results, {remaining} quota remaining."
+            "Keyword search '%s' by user %s:"
+            "%s results, %s quota remaining.",
+            query, user_id, len(movies), remaining
         )
         return movies, remaining
 
@@ -289,7 +298,8 @@ class MovieService:
 
         if not await redis_client.exists(idx_key):
             logger.info(
-                f"Genre index '{genre_name}' missing — cache may not be warm yet."
+                "Genre index '%s' missing — cache may not be warm yet.",
+                genre_name
             )
             return None
 

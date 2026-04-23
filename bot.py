@@ -37,7 +37,7 @@ async def main() -> None:
 
             webhook_url = f"{settings.WEBHOOK_URL}{settings.WEBHOOK_PATH}"
             await bot.set_webhook(webhook_url, drop_pending_updates=True)
-            logger.info(f"Webhook registered - {webhook_url}")
+            logger.info("Webhook registered %s", webhook_url)
 
             app = web.Application()
             SimpleRequestHandler(dispatcher=dp, bot=bot).register(
@@ -50,7 +50,8 @@ async def main() -> None:
             site = web.TCPSite(runner, settings.HOST, settings.BOT_PORT)
             await site.start()
             logger.info(
-                f"Bot webhook server listening on {settings.HOST}:{settings.BOT_PORT}"
+                "Bot webhook server listening on %s:%s", 
+                settings.HOST, settings.BOT_PORT
             )
 
             # Run until interrupted
@@ -61,7 +62,7 @@ async def main() -> None:
 
         else:
             # Polling mode
-            logger.info("Starting long-polling…")
+            logger.info("Starting long-polling...")
             await dp.start_polling(
                 bot,
                 allowed_updates=dp.resolve_used_update_types(),
