@@ -1,3 +1,6 @@
+## Скриншот
+<img src="screenshots/preview.png" width="300" alt="Превью">
+
 ## Стек
 - **Python 3.14**
 - **aiogram 3.26.0** — Telegram-бот
