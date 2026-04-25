@@ -40,19 +40,23 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         )
     
     webhook_url = f"{settings.WEBHOOK_URL}{settings.WEBHOOK_PATH}"
-    result = await bot.set_webhook(
-        webhook_url,
-        secret_token=settings.SECRET_TOKEN, 
-        drop_pending_updates=True
-    )
-    logger.info("Webhook registered: %s, result: %s", webhook_url, result)
+    try:
+        result = await bot.set_webhook(
+            webhook_url,
+            secret_token=settings.SECRET_TOKEN, 
+            drop_pending_updates=True
+        )
+        logger.info("Webhook registered: %s, result: %s", webhook_url, result)
 
-    webhook_info = await bot.get_webhook_info()
-    logger.info("Webhook info: url=%s, pending=%s, last_error=%s",
-        webhook_info.url,
-        webhook_info.pending_update_count,
-        webhook_info.last_error_message,
-    )
+        webhook_info = await bot.get_webhook_info()
+        logger.info("Webhook info: url=%s, pending=%s, last_error=%s",
+            webhook_info.url,
+            webhook_info.pending_update_count,
+            webhook_info.last_error_message,
+        )
+    except Exception as e:
+        logger.exception("Webhook setup failed: %s", e)
+        raise
 
     yield
 
