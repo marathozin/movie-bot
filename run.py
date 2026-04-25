@@ -47,6 +47,13 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     )
     logger.info("Webhook registered: %s", webhook_url)
 
+    webhook_info = await bot.get_webhook_info()
+    logger.info("Webhook info: url=%s, pending=%s, last_error=%s",
+        webhook_info.url,
+        webhook_info.pending_update_count,
+        webhook_info.last_error_message,
+    )
+
     yield
 
     await bot.delete_webhook()
